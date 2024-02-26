@@ -122,6 +122,9 @@ app.get('/stats/:playerName', (req, res) => {
                     }
                     res.send(`LVL: ${playerLevel}, ELO: ${playerElo}, Mecze: ${wins}W/${losses}L`)
                     console.log(`%c /stats %c Zwrócono statystyki gracza %c${req.params.playerName}%c.`, 'background: #00ff33; color: #000;', 'color: #fff', 'color: #47ff6c', 'color: #fff;')
+                }else{
+                    res.send(`Wystąpił błąd. Spróbuj ponownie później.`)
+                    console.log(`%c /stats %c %c ${response.status} %c Wystąpił błąd: %c${await response.text()}`, 'background: #ff1c1c; color: #fff;', 'color: #fff', 'background: #ff1c1c; color: #fff;', 'color: #fff;', 'color: #ff4a4a')
                 }
             })
         } else {
@@ -136,4 +139,11 @@ app.get('/stats/:playerName', (req, res) => {
     })
 })
 
-app.listen(process.env.PORT || 80)
+if (!process.env.API_KEY) {
+    console.log(`%c Serwer %c Nie znaleziono klucza API (%cAPI_KEY%c) w pliku %c.env%c.`, 'background: #ff1c1c; color: #fff;', 'color: #fff;', 'color: #ff4a4a', 'color: #fff;', 'color: #ff4a4a', 'color: #fff;')
+}else{
+    if (!process.env.PORT) {
+        console.log(`%c Serwer %c Nie znaleziono portu (%cPORT%c) w pliku %c.env%c. Używam portu 80.`, 'background: #ff8000; color: #fff;', 'color: #fff;', 'color: #ffa347', 'color: #fff;', 'color: #ffa347', 'color: #fff;')
+    }
+    app.listen(process.env.PORT || 80)
+}
