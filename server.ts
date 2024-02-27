@@ -9,7 +9,7 @@ interface PlayersResponse {
     player_id: string,
     nickname: string,
     games: {
-        cs2: CS2Stats
+        cs2?: CS2Stats
     },
 }
 
@@ -86,53 +86,61 @@ app.get('/stats/:playerName', (req, res) => {
         if (response.ok) {
             const playersResponse = (await response.json() as PlayersResponse)
 
-            const playerId = playersResponse.player_id
-            const playerElo = playersResponse.games.cs2.faceit_elo
-            const playerLevel = playersResponse.games.cs2.skill_level
 
-            const startDate = new Date()
-            startDate.setHours(0)
-            startDate.setMinutes(0)
-            startDate.setSeconds(0)
 
-            fetch(`https://open.faceit.com/data/v4/players/${playerId}/history?game=cs2&limit=50`, {headers}).then(async response => {
-                if (response.ok) {
-                    const historyResponse = await response.json() as HistoryResponse
-                    const matches = historyResponse.items;
+            if (!playersResponse.games.cs2) {
+                res.status(404).send(`Ten gracz nigdy nie grał w CS2 na FACEIT.`)
+                console.log(`%c /stats %c Gracz %c${req.params.playerName}%c nigdy nie grał w CS2 na FACEIT.`, 'background: #002fff; color: #fff;', 'color: #fff', 'color: #4a6bff', 'color: #fff;')
+                return
+            }else{
+                const playerId = playersResponse.player_id
+                const playerElo = playersResponse.games.cs2.faceit_elo
+                const playerLevel = playersResponse.games.cs2.skill_level
 
-                    let wins = 0
-                    let losses = 0
-                    for (const i in matches) {
-                        if (startDate.getTime() / 1000 >= matches[i].started_at) continue
+                const startDate = new Date()
+                startDate.setHours(0)
+                startDate.setMinutes(0)
+                startDate.setSeconds(0)
 
-                        const match = matches[i]
-                        const winners = match.results.winner
-                        let found = false
-                        for (const i2 in match.teams[winners].players) {
-                            if (match.teams[winners].players[i2].player_id === playerId) {
-                                found = true;
+                fetch(`https://open.faceit.com/data/v4/players/${playerId}/history?game=cs2&limit=50`, {headers}).then(async response => {
+                    if (response.ok) {
+                        const historyResponse = await response.json() as HistoryResponse
+                        const matches = historyResponse.items;
+
+                        let wins = 0
+                        let losses = 0
+                        for (const i in matches) {
+                            if (startDate.getTime() / 1000 >= matches[i].started_at) continue
+
+                            const match = matches[i]
+                            const winners = match.results.winner
+                            let found = false
+                            for (const i2 in match.teams[winners].players) {
+                                if (match.teams[winners].players[i2].player_id === playerId) {
+                                    found = true;
+                                }
                             }
-                        }
-                        if (found) {
-                            wins++
-                        } else {
-                            losses++
-                        }
+                            if (found) {
+                                wins++
+                            } else {
+                                losses++
+                            }
 
+                        }
+                        res.send(`LVL: ${playerLevel}, ELO: ${playerElo}, Bilans: ${wins}W/${losses}L`)
+                        console.log(`%c /stats %c Zwrócono statystyki gracza %c${req.params.playerName}%c.`, 'background: #00ff33; color: #000;', 'color: #fff', 'color: #47ff6c', 'color: #fff;')
+                    }else{
+                        res.status(500).send(`Wystąpił błąd. Spróbuj ponownie później.`)
+                        console.log(`%c /stats %c %c ${response.status} %c Wystąpił błąd: %c${await response.text()}`, 'background: #ff1c1c; color: #fff;', 'color: #fff', 'background: #ff1c1c; color: #fff;', 'color: #fff;', 'color: #ff4a4a')
                     }
-                    res.send(`LVL: ${playerLevel}, ELO: ${playerElo}, Mecze: ${wins}W/${losses}L`)
-                    console.log(`%c /stats %c Zwrócono statystyki gracza %c${req.params.playerName}%c.`, 'background: #00ff33; color: #000;', 'color: #fff', 'color: #47ff6c', 'color: #fff;')
-                }else{
-                    res.send(`Wystąpił błąd. Spróbuj ponownie później.`)
-                    console.log(`%c /stats %c %c ${response.status} %c Wystąpił błąd: %c${await response.text()}`, 'background: #ff1c1c; color: #fff;', 'color: #fff', 'background: #ff1c1c; color: #fff;', 'color: #fff;', 'color: #ff4a4a')
-                }
-            })
+                })
+            }
         } else {
             if (response.status === 404) {
-                res.send(`Nie znaleziono gracza ${req.params.playerName} na FACEIT.`)
+                res.status(404).send(`Nie znaleziono gracza ${req.params.playerName} na FACEIT.`)
                 console.log(`%c /stats %c %c 404 %c Nie znaleziono gracza %c${req.params.playerName}`, 'background: #ff1c1c; color: #fff;', 'color: #fff', 'background: #ff1c1c; color: #fff;', 'color: #fff;', 'color: #ff4a4a')
             } else {
-                res.send(`Wystąpił błąd. Spróbuj ponownie później.`)
+                res.status(500).send(`Wystąpił błąd. Spróbuj ponownie później.`)
                 console.log(`%c /stats %c %c ${response.status} %c Wystąpił błąd: %c${await response.text()}`, 'background: #ff1c1c; color: #fff;', 'color: #fff', 'background: #ff1c1c; color: #fff;', 'color: #fff;', 'color: #ff4a4a')
             }
         }

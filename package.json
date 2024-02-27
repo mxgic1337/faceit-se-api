@@ -1,9 +1,10 @@
 {
   "name": "faceit-stats",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "",
   "main": "index.js",
   "scripts": {
+    "run": "node dist/index.js",
     "dev": "ts-node-dev server.ts",
     "build": "tsc"
   },
