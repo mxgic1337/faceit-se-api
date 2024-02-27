@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "run": "node dist/index.js",
+    "run": "node dist/server.js",
     "dev": "ts-node-dev server.ts",
     "build": "tsc"
   },
