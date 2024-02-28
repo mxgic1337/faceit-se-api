@@ -8,4 +8,7 @@ API do [StreamElements](https://streamelements.com), które wyświetla statystyk
 ```
 To pozwoli twoim widzom sprawdzić statystyki graczy poprzez użycie komendy **!elo**.
 
+## 🔗 Linki
+- [Dokumentacja](https://docs.mxgic1337.xyz/faceit-stats-api/#/)
+
 Projekt nie jest powiązany z **FACEIT** lub/i **StreamElements**.
