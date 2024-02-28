@@ -73,7 +73,18 @@ const headers = {
 }
 
 app.get('/', (req, res) => {
-    res.send(`<h1>Witaj!</h1>Użycie: <code><b>${req.hostname}/stats/[nick]</b></code>, np. <code><b>${req.hostname}/stats/Magic2115</b></code><br/>
+    res.send(`
+    <h1>Witaj!</h1>
+    Użycie: <code><b>/stats/[nick]</b></code>, np. <code><b>/stats/Magic2115</b></code><br/>
+    Możesz również zmienić format zwracanej wiadomości, dodając parametr <b>?format</b>.<br/>
+    Przykładowo: <code><b>/stats/Magic2115?format=LVL: $lvl, ELO: $elo, W: $wins, L: $losses</b></code> zwróci <code><b>LVL: 2, ELO: 742, W: 0, L: 0</b></code><br/>
+    <h2>Dostępne zmienne:</h2>
+    <ul>
+        <li><b>$lvl</b> - Poziom gracza</li>
+        <li><b>$elo</b> - Punkty ELO gracza</li>
+        <li><b>$wins</b> - Zwycięstwa gracza (ostatnie 24h, do 50 gier)</li>
+        <li><b>$losses</b> - Przegrane gracza (ostatnie 24h, do 50 gier)</li>
+    </ul>
     <a href="https://github.com/mxgic1337/faceit-stats-api">GitHub</a>`)
 })
 
@@ -125,7 +136,13 @@ app.get('/stats/:playerName', (req, res) => {
                             }
 
                         }
-                        res.send(`LVL: ${playerLevel}, ELO: ${playerElo}, Bilans: ${wins}W/${losses}L`)
+                        let format = req.query.format as string | undefined || `LVL: $lvl, ELO: $elo, Bilans: $winsW / $lossesL`
+                        format = format
+                            .replace('$lvl', String(playerLevel))
+                            .replace('$elo', String(playerElo))
+                            .replace('$wins', String(wins))
+                            .replace('$losses', String(losses))
+                        res.send(format)
                         console.log(`%c /stats %c Zwrócono statystyki gracza %c${req.params.playerName}%c.`, 'background: #00ff33; color: #000;', 'color: #fff', 'color: #47ff6c', 'color: #fff;')
                     }else{
                         res.send(`Wystąpił błąd. Spróbuj ponownie później.`)
