@@ -86,10 +86,8 @@ app.get('/stats/:playerName', (req, res) => {
         if (response.ok) {
             const playersResponse = (await response.json() as PlayersResponse)
 
-
-
             if (!playersResponse.games.cs2) {
-                res.status(404).send(`Ten gracz nigdy nie grał w CS2 na FACEIT.`)
+                res.send(`Ten gracz nigdy nie grał w CS2 na FACEIT.`)
                 console.log(`%c /stats %c Gracz %c${req.params.playerName}%c nigdy nie grał w CS2 na FACEIT.`, 'background: #002fff; color: #fff;', 'color: #fff', 'color: #4a6bff', 'color: #fff;')
                 return
             }else{
@@ -130,17 +128,17 @@ app.get('/stats/:playerName', (req, res) => {
                         res.send(`LVL: ${playerLevel}, ELO: ${playerElo}, Bilans: ${wins}W/${losses}L`)
                         console.log(`%c /stats %c Zwrócono statystyki gracza %c${req.params.playerName}%c.`, 'background: #00ff33; color: #000;', 'color: #fff', 'color: #47ff6c', 'color: #fff;')
                     }else{
-                        res.status(500).send(`Wystąpił błąd. Spróbuj ponownie później.`)
+                        res.send(`Wystąpił błąd. Spróbuj ponownie później.`)
                         console.log(`%c /stats %c %c ${response.status} %c Wystąpił błąd: %c${await response.text()}`, 'background: #ff1c1c; color: #fff;', 'color: #fff', 'background: #ff1c1c; color: #fff;', 'color: #fff;', 'color: #ff4a4a')
                     }
                 })
             }
         } else {
             if (response.status === 404) {
-                res.status(404).send(`Nie znaleziono gracza ${req.params.playerName} na FACEIT.`)
+                res.send(`Nie znaleziono gracza ${req.params.playerName} na FACEIT.`)
                 console.log(`%c /stats %c %c 404 %c Nie znaleziono gracza %c${req.params.playerName}`, 'background: #ff1c1c; color: #fff;', 'color: #fff', 'background: #ff1c1c; color: #fff;', 'color: #fff;', 'color: #ff4a4a')
             } else {
-                res.status(500).send(`Wystąpił błąd. Spróbuj ponownie później.`)
+                res.send(`Wystąpił błąd. Spróbuj ponownie później.`)
                 console.log(`%c /stats %c %c ${response.status} %c Wystąpił błąd: %c${await response.text()}`, 'background: #ff1c1c; color: #fff;', 'color: #fff', 'background: #ff1c1c; color: #fff;', 'color: #fff;', 'color: #ff4a4a')
             }
         }
