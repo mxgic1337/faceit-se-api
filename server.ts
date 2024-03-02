@@ -78,6 +78,7 @@ app.get('/', (req, res) => {
     Użycie: <code><b>/stats/[nick]</b></code>, np. <code><b>/stats/Magic2115</b></code><br/>
     Możesz również zmienić format zwracanej wiadomości, dodając parametr <b>?format</b>.<br/>
     Przykładowo: <code><b>/stats/Magic2115?format=LVL: $lvl, ELO: $elo, W: $wins, L: $losses</b></code> zwróci <code><b>LVL: 2, ELO: 742, W: 0, L: 0</b></code><br/>
+    <br/>
     <h2>Dostępne zmienne:</h2>
     <ul>
         <li><b>$lvl</b> - Poziom gracza</li>
@@ -85,7 +86,8 @@ app.get('/', (req, res) => {
         <li><b>$wins</b> - Zwycięstwa gracza (ostatnie 24h, do 50 gier)</li>
         <li><b>$losses</b> - Przegrane gracza (ostatnie 24h, do 50 gier)</li>
     </ul>
-    <a href="https://github.com/mxgic1337/faceit-stats-api">GitHub</a> &bull; <a href="https://docs.mxgic1337.xyz/faceit-stats-api/#/">Dokumentacja</a>`)
+    <a href="https://github.com/mxgic1337/faceit-stats-api">GitHub</a> &bull; <a href="https://docs.mxgic1337.xyz/faceit-stats-api/#/">Dokumentacja</a>
+    <p>Projekt nie jest powiązany z <b>FACEIT</b> lub/i <b>StreamElements</b>.</p>`)
 })
 
 app.get('/stats/:playerName', (req, res) => {
