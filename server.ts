@@ -86,7 +86,7 @@ app.get('/', (req, res) => {
         <li><b>$wins</b> - Zwycięstwa gracza (ostatnie 24h, do 50 gier)</li>
         <li><b>$losses</b> - Przegrane gracza (ostatnie 24h, do 50 gier)</li>
     </ul>
-    <a href="https://github.com/mxgic1337/faceit-stats-api">GitHub</a> &bull; <a href="https://docs.mxgic1337.xyz/faceit-stats-api/#/">Dokumentacja</a>
+    <a href="https://github.com/mxgic1337/faceit-se-api">GitHub</a> &bull; <a href="https://docs.mxgic1337.xyz/faceit-se-api/#/">Dokumentacja</a>
     <p>Projekt nie jest powiązany z <b>FACEIT</b> lub/i <b>StreamElements</b>.</p>`)
 })
 
