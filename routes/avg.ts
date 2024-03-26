@@ -73,5 +73,5 @@ avgRoute.get('/:playerName', (req, res) => {
 })
 
 function round(number: number) {
-    return Math.floor((Math.round((number * 100)) / 100))
+    return Math.floor((number * 100)) / 100
 }
