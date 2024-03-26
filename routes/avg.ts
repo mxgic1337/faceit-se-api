@@ -1,5 +1,5 @@
 import express from 'express'
-import {headers, HistoryResponse, PlayersResponse} from "../server";
+import {headers, PlayersResponse} from "../server";
 
 export const avgRoute = express.Router()
 
@@ -29,13 +29,6 @@ avgRoute.get('/:playerName', (req, res) => {
                 return
             }else{
                 const playerId = playersResponse.player_id
-                const playerElo = playersResponse.games.cs2.faceit_elo
-                const playerLevel = playersResponse.games.cs2.skill_level
-
-                const startDate = new Date()
-                startDate.setHours(0)
-                startDate.setMinutes(0)
-                startDate.setSeconds(0)
 
                 fetch(`https://open.faceit.com/data/v4/players/${playerId}/games/cs2/stats?offset=0&limit=20`, {headers}).then(async response => {
                     if (response.ok) {
