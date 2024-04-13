@@ -2,6 +2,7 @@ import express from 'express'
 import dotenv from 'dotenv'
 import {statsRoute} from "./routes/stats";
 import {avgRoute} from "./routes/avg";
+import {lastRoute} from "./routes/last";
 
 const app = express()
 
@@ -93,6 +94,7 @@ app.get('/', (req, res) => {
 })
 
 app.use('/stats', statsRoute)
+app.use('/last', lastRoute)
 app.use('/avg', avgRoute)
 
 if (!process.env.API_KEY) {
