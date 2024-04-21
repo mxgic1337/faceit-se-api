@@ -33,10 +33,9 @@ statsRoute.get('/:playerName', (req, res) => {
 
                         let wins = 0
                         let losses = 0
-                        for (const i in matches) {
-                            if (startDate.getTime() / 1000 >= matches[i].started_at) continue
-
-                            const match = matches[i]
+                        for (const match of matches) {
+                            if (startDate.getTime() / 1000 >= match.started_at) continue
+                            if (match.organizer_id !== 'faceit') continue
                             const winners = match.results.winner
                             let found = false
                             for (const i2 in match.teams[winners].players) {
