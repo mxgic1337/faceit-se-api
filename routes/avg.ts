@@ -50,7 +50,7 @@ avgRoute.get('/:playerName', (req, res) => {
                                 const statsResponse = await response.json() as StatsResponse
                                 let matches_stats = statsResponse.items;
                                 matches_stats = matches_stats.filter(match => matchIds.includes(match.stats['Match Id']))
-                                console.log(matches_stats)
+
                                 let kills = 0
                                 let kd = 0
                                 let kr = 0
