@@ -78,9 +78,9 @@ export const headers = {
 app.get('/', (req, res) => {
     res.send(`
     <h1>Witaj!</h1>
-    Użycie: <code><b>/stats/[nick]</b></code>, np. <code><b>/stats/Magic2115</b></code><br/>
+    Użycie: <code><b>/stats/[nick]</b></code>, np. <code><b>/stats/donk666</b></code><br/>
     Możesz również zmienić format zwracanej wiadomości, dodając parametr <b>?format</b>.<br/>
-    Przykładowo: <code><b>/stats/Magic2115?format=LVL: $lvl, ELO: $elo, W: $wins, L: $losses</b></code> zwróci <code><b>LVL: 2, ELO: 742, W: 0, L: 0</b></code><br/>
+    Przykładowo: <code><b>/stats/donk666?format=LVL: $lvl, ELO: $elo, W: $wins, L: $losses</b></code> zwróci <code><b>LVL: 10, ELO: 4401, W: 0, L: 0</b></code><br/>
     <br/>
     <h2>Dostępne zmienne:</h2>
     <ul>
