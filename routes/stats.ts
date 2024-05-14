@@ -1,7 +1,17 @@
 import express from 'express'
-import {headers, HistoryResponse, PlayersResponse} from "../server";
+import {headers, PlayersResponse} from "../server";
 
 export const statsRoute = express.Router()
+
+export interface Matchv1 {
+    teamId: string,
+    i2: string,
+    elo: string,
+    competitionId: string
+    created_at: number
+}
+
+const competitionId = 'f4148ddd-bce8-41b8-9131-ee83afcdd6dd'
 
 statsRoute.get('/:playerName', (req, res) => {
     console.log(`%c /stats %c Pobieranie statystyk gracza %c${req.params.playerName}%c...`, 'background: #002fff; color: #fff;', 'color: #fff', 'color: #4a6bff', 'color: #fff;')
@@ -16,7 +26,7 @@ statsRoute.get('/:playerName', (req, res) => {
                 res.send(`Ten gracz nigdy nie grał w CS2 na FACEIT.`)
                 console.log(`%c /stats %c Gracz %c${req.params.playerName}%c nigdy nie grał w CS2 na FACEIT.`, 'background: #002fff; color: #fff;', 'color: #fff', 'color: #4a6bff', 'color: #fff;')
                 return
-            }else{
+            } else {
                 const playerId = playersResponse.player_id
                 const playerElo = playersResponse.games.cs2.faceit_elo
                 const playerLevel = playersResponse.games.cs2.skill_level
@@ -26,39 +36,46 @@ statsRoute.get('/:playerName', (req, res) => {
                 startDate.setMinutes(0)
                 startDate.setSeconds(0)
 
-                fetch(`https://open.faceit.com/data/v4/players/${playerId}/history?game=cs2&limit=50`, {headers}).then(async response => {
+                fetch(`https://www.faceit.com/api/stats/v1/stats/time/users/${playerId}/games/cs2?size=100`).then(async response => {
                     if (response.ok) {
-                        const historyResponse = await response.json() as HistoryResponse
-                        const matches = historyResponse.items;
+                        let matches = await response.json() as Matchv1[]
 
                         let wins = 0
                         let losses = 0
-                        for (const match of matches) {
-                            if (startDate.getTime() / 1000 >= match.started_at) continue
-                            if (match.organizer_id !== 'faceit') continue
-                            const winners = match.results.winner
-                            let found = false
-                            for (const i2 in match.teams[winners].players) {
-                                if (match.teams[winners].players[i2].player_id === playerId) {
-                                    found = true;
+
+                        const todayMatches = matches.filter(match => startDate.getTime() <= match.created_at && match.competitionId === competitionId)
+                        matches = matches.filter(match => !todayMatches.includes(match))
+
+                        console.log(todayMatches.length)
+                        console.log(matches[0].elo)
+
+                        let eloDiff = 0
+                        if (todayMatches.length > 0) {
+                            let startElo = parseInt(todayMatches[todayMatches.length - 1].elo)
+                            if (matches.length > 0) {
+                                startElo = parseInt(matches[0].elo);
+                            }
+                            eloDiff = playerElo - startElo
+
+                            for (const match of todayMatches) {
+                                console.log(match.elo)
+                                if (match.i2 === match.teamId) {
+                                    wins += 1
+                                } else {
+                                    losses++
                                 }
                             }
-                            if (found) {
-                                wins++
-                            } else {
-                                losses++
-                            }
-
                         }
-                        let format = req.query.format as string | undefined || `LVL: $lvl, ELO: $elo, Bilans: $winsW / $lossesL`
+                        let format = req.query.format as string | undefined || `LVL: $lvl, ELO: $elo ($diff), Mecze: $winsW / $lossesL`
                         format = format
                             .replace('$lvl', String(playerLevel))
                             .replace('$elo', String(playerElo))
+                            .replace('$diff', String(eloDiff > 0 ? `+${eloDiff}` : eloDiff))
                             .replace('$wins', String(wins))
                             .replace('$losses', String(losses))
                         res.send(format)
                         console.log(`%c /stats %c Zwrócono statystyki gracza %c${req.params.playerName}%c.`, 'background: #00ff33; color: #000;', 'color: #fff', 'color: #47ff6c', 'color: #fff;')
-                    }else{
+                    } else {
                         res.send(`Wystąpił błąd. Spróbuj ponownie później.`)
                         console.log(`%c /stats %c %c ${response.status} %c Wystąpił błąd: %c${await response.text()}`, 'background: #ff1c1c; color: #fff;', 'color: #fff', 'background: #ff1c1c; color: #fff;', 'color: #fff;', 'color: #ff4a4a')
                     }

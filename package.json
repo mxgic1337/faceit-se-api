@@ -1,8 +1,11 @@
 {
-  "name": "faceit-stats",
-  "version": "0.1.0",
+  "name": "faceit-se-api",
+  "version": "0.5.0",
   "description": "",
   "main": "server.js",
+  "repository": {
+    "url": "https://github.com/mxgic1337/faceit-se-api"
+  },
   "scripts": {
     "run": "node dist/server.js",
     "dev": "ts-node-dev server.ts",
