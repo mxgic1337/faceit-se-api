@@ -46,9 +46,6 @@ statsRoute.get('/:playerName', (req, res) => {
                         const todayMatches = matches.filter(match => startDate.getTime() <= match.created_at && match.competitionId === competitionId)
                         matches = matches.filter(match => !todayMatches.includes(match))
 
-                        console.log(todayMatches.length)
-                        console.log(matches[0].elo)
-
                         let eloDiff = 0
                         if (todayMatches.length > 0) {
                             let startElo = parseInt(todayMatches[todayMatches.length - 1].elo)
@@ -58,7 +55,6 @@ statsRoute.get('/:playerName', (req, res) => {
                             eloDiff = playerElo - startElo
 
                             for (const match of todayMatches) {
-                                console.log(match.elo)
                                 if (match.i2 === match.teamId) {
                                     wins += 1
                                 } else {
