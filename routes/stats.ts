@@ -44,7 +44,7 @@ statsRoute.get('/:playerName', (req, res) => {
                         let losses = 0
 
                         const todayMatches = matches.filter(match => startDate.getTime() <= match.created_at && match.competitionId === competitionId)
-                        matches = matches.filter(match => !todayMatches.includes(match))
+                        matches = matches.filter(match => !todayMatches.includes(match) && match.competitionId === competitionId)
 
                         let eloDiff = 0
                         if (todayMatches.length > 0) {
