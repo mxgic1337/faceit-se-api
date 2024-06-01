@@ -31,12 +31,18 @@ statsRoute.get('/:playerName', (req, res) => {
                 const playerElo = playersResponse.games.cs2.faceit_elo
                 const playerLevel = playersResponse.games.cs2.skill_level
 
-                const startDate = new Date()
+                let startDate = new Date()
                 startDate.setHours(0)
                 startDate.setMinutes(0)
                 startDate.setSeconds(0)
+                let size = 100
 
-                fetch(`https://www.faceit.com/api/stats/v1/stats/time/users/${playerId}/games/cs2?size=100`).then(async response => {
+                if (req.query.startDate && !isNaN(Number(req.query.startDate))) {
+                    startDate = new Date(Number(req.query.startDate))
+                    size = 500
+                }
+
+                fetch(`https://www.faceit.com/api/stats/v1/stats/time/users/${playerId}/games/cs2?size=${size}`).then(async response => {
                     if (response.ok) {
                         let matches = await response.json() as Matchv1[]
 
@@ -69,7 +75,17 @@ statsRoute.get('/:playerName', (req, res) => {
                             .replace('$diff', String(eloDiff > 0 ? `+${eloDiff}` : eloDiff))
                             .replace('$wins', String(wins))
                             .replace('$losses', String(losses))
-                        res.send(format)
+                        if (format === 'json') {
+                            res.json({
+                                level: playerLevel,
+                                elo: playerElo,
+                                diff: eloDiff,
+                                wins: wins,
+                                losses: losses,
+                            })
+                        }else{
+                            res.send(format)
+                        }
                         console.log(`%c /stats %c Zwrócono statystyki gracza %c${req.params.playerName}%c.`, 'background: #00ff33; color: #000;', 'color: #fff', 'color: #47ff6c', 'color: #fff;')
                     } else {
                         res.send(`Wystąpił błąd. Spróbuj ponownie później.`)
