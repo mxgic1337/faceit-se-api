@@ -1,5 +1,5 @@
 import express from 'express'
-import {headers, HistoryResponse, PlayersResponse} from "../server";
+import {handleError, headers, HistoryResponse, PlayersResponse} from "../server";
 
 export const avgRoute = express.Router()
 
@@ -74,12 +74,12 @@ avgRoute.get('/:playerName', (req, res) => {
                                 res.send(`Wystąpił błąd. Spróbuj ponownie później.`)
                                 console.log(`%c /avg %c %c ${response.status} %c Wystąpił błąd: %c${await response.text()}`, 'background: #ff1c1c; color: #fff;', 'color: #fff', 'background: #ff1c1c; color: #fff;', 'color: #fff;', 'color: #ff4a4a')
                             }
-                        })
+                        }).catch((err)=>handleError(err, res))
                     } else {
                         res.send(`Wystąpił błąd. Spróbuj ponownie później.`)
                         console.log(`%c /avg %c %c ${response.status} %c Wystąpił błąd: %c${await response.text()}`, 'background: #ff1c1c; color: #fff;', 'color: #fff', 'background: #ff1c1c; color: #fff;', 'color: #fff;', 'color: #ff4a4a')
                     }
-                })
+                }).catch((err)=>handleError(err, res))
 
 
             }
@@ -92,7 +92,7 @@ avgRoute.get('/:playerName', (req, res) => {
                 console.log(`%c /avg %c %c ${response.status} %c Wystąpił błąd: %c${await response.text()}`, 'background: #ff1c1c; color: #fff;', 'color: #fff', 'background: #ff1c1c; color: #fff;', 'color: #fff;', 'color: #ff4a4a')
             }
         }
-    })
+    }).catch((err)=>handleError(err, res))
 })
 
 function round(number: number) {

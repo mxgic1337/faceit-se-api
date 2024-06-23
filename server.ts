@@ -98,6 +98,11 @@ app.use('/stats', statsRoute)
 app.use('/last', lastRoute)
 app.use('/avg', avgRoute)
 
+export function handleError(err: Error, res: express.Response) {
+    res.send(`Wystąpił błąd. Spróbuj ponownie później.`)
+    console.error(err)
+}
+
 if (!process.env.API_KEY) {
     console.log(`%c Serwer %c Nie znaleziono klucza API (%cAPI_KEY%c) w pliku %c.env%c.`, 'background: #ff1c1c; color: #fff;', 'color: #fff;', 'color: #ff4a4a', 'color: #fff;', 'color: #ff4a4a', 'color: #fff;')
 } else {

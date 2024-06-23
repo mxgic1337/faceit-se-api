@@ -1,5 +1,5 @@
 import express from 'express'
-import {headers, PlayersResponse} from "../server";
+import {handleError, headers, PlayersResponse} from "../server";
 
 export const statsRoute = express.Router()
 
@@ -91,7 +91,7 @@ statsRoute.get('/:playerName', (req, res) => {
                         res.send(`Wystąpił błąd. Spróbuj ponownie później.`)
                         console.log(`%c /stats %c %c ${response.status} %c Wystąpił błąd: %c${await response.text()}`, 'background: #ff1c1c; color: #fff;', 'color: #fff', 'background: #ff1c1c; color: #fff;', 'color: #fff;', 'color: #ff4a4a')
                     }
-                })
+                }).catch((err)=>handleError(err, res))
             }
         } else {
             if (response.status === 404) {
@@ -102,5 +102,5 @@ statsRoute.get('/:playerName', (req, res) => {
                 console.log(`%c /stats %c %c ${response.status} %c Wystąpił błąd: %c${await response.text()}`, 'background: #ff1c1c; color: #fff;', 'color: #fff', 'background: #ff1c1c; color: #fff;', 'color: #fff;', 'color: #ff4a4a')
             }
         }
-    })
+    }).catch((err)=>handleError(err, res))
 })
