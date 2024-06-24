@@ -3,6 +3,7 @@ import dotenv from 'dotenv'
 import {statsRoute} from "./routes/stats";
 import {avgRoute} from "./routes/avg";
 import {lastRoute} from "./routes/last";
+import packageJSON from "./package.json"
 
 const app = express()
 
@@ -91,7 +92,8 @@ app.get('/', (req, res) => {
         <li><b>$losses</b> - Przegrane gracza (ostatnie 24h, do 100 gier)</li>
     </ul>
     <a href="https://github.com/mxgic1337/faceit-se-api">GitHub</a> &bull; <a href="https://docs.mxgic1337.xyz/faceit-se-api/#/">Dokumentacja</a>
-    <p>Projekt nie jest powiązany z <b>FACEIT</b> lub/i <b>StreamElements</b>.</p>`)
+    <p>Projekt nie jest powiązany z <b>FACEIT</b> lub/i <b>StreamElements</b>.</p>
+    <p>Wersja <b>${packageJSON.version}</b></p>`)
 })
 
 app.use('/stats', statsRoute)

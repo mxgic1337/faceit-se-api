@@ -11,6 +11,7 @@ interface StatsResponse {
             "K/R Ratio": string,
             "Headshots %": string,
             "Match Id": string,
+            "Competition Id": string,
         }
     }[]
 }
@@ -23,66 +24,67 @@ avgRoute.get('/:playerName', (req, res) => {
     }).then(async response => {
         if (response.ok) {
             const playersResponse = (await response.json() as PlayersResponse)
+            const playerId = playersResponse.player_id
 
-            if (!playersResponse.games.cs2) {
-                res.send(`Ten gracz nigdy nie grał w CS2 na FACEIT.`)
-                console.log(`%c /avg %c Gracz %c${req.params.playerName}%c nigdy nie grał w CS2 na FACEIT.`, 'background: #002fff; color: #fff;', 'color: #fff', 'color: #4a6bff', 'color: #fff;')
-                return
-            } else {
-                const playerId = playersResponse.player_id
+            fetch(`https://open.faceit.com/data/v4/players/${playerId}/history?game=cs2&limit=50`, {headers}).then(async response => {
+                if (response.ok) {
+                    let i = 0;
 
-                fetch(`https://open.faceit.com/data/v4/players/${playerId}/history?game=cs2&limit=50`, {headers}).then(async response => {
-                    if (response.ok) {
-                        let i = 0;
+                    const historyResponse = await response.json() as HistoryResponse
+                    let matches = historyResponse.items;
+                    matches = matches.filter(match => match.organizer_id === 'faceit')
+                    console.log(matches)
+                    const matchIds: string[] = []
+                    for (const match of matches) {
+                        if (i >= 20) { continue }
+                        matchIds.push(match.match_id)
+                        i++
+                    }
 
-                        const historyResponse = await response.json() as HistoryResponse
-                        let matches = historyResponse.items;
-                        matches = matches.filter(match => match.organizer_id === 'faceit')
-                        const matchIds: string[] = []
-                        for (const match of matches) {
-                            if (i >= 20) { continue }
-                            matchIds.push(match.match_id)
-                            i++
-                        }
+                    fetch(`https://open.faceit.com/data/v4/players/${playerId}/games/cs2/stats?offset=0&limit=50`, {headers}).then(async response => {
+                        if (response.ok) {
+                            const statsResponse = await response.json() as StatsResponse
+                            let matches_stats = statsResponse.items;
+                            matches_stats = matches_stats.filter(match => match.stats['Competition Id'] === "f4148ddd-bce8-41b8-9131-ee83afcdd6dd")
 
-                        fetch(`https://open.faceit.com/data/v4/players/${playerId}/games/cs2/stats?offset=0&limit=50`, {headers}).then(async response => {
-                            if (response.ok) {
-                                const statsResponse = await response.json() as StatsResponse
-                                let matches_stats = statsResponse.items;
-                                matches_stats = matches_stats.filter(match => matchIds.includes(match.stats['Match Id']))
-
+                            if (matches_stats.length === 0) {
+                                res.send(`Nie znaleziono gier z których można wyliczyć średnią.`)
+                                console.log(`%c /avg %c %cWystąpił błąd: Nie znaleziono gier z których można wyliczyć średnią.`, 'background: #ff1c1c; color: #fff;', 'color: #fff', 'background: #ff1c1c; color: #fff;', 'color: #fff;', 'color: #ff4a4a')
+                            }else{
                                 let kills = 0
                                 let kd = 0
                                 let kr = 0
                                 let headshots = 0
+                                let matches = 0
+
                                 for (const match of matches_stats) {
+                                    if (matches >= 20) continue
                                     kills += parseInt(match.stats.Kills)
                                     kd += parseFloat(match.stats["K/D Ratio"])
                                     kr += parseFloat(match.stats["K/R Ratio"])
                                     headshots += parseFloat(match.stats["Headshots %"])
+                                    matches++;
                                 }
 
                                 let format = req.query.format as string | undefined || `Zabójstwa: $kills, K/D: $kd, K/R: $kr, % headshotów: $hspercent`
                                 format = format
-                                    .replace('$kills', String(round(kills / matches_stats.length)))
-                                    .replace('$kd', String(round(kd / matches_stats.length)))
-                                    .replace('$kr', String(round(kr / matches_stats.length)))
-                                    .replace('$hspercent', String(round(headshots / matches_stats.length) + "%"))
+                                    .replace('$kills', String(round(kills / matches)))
+                                    .replace('$kd', String(round(kd / matches)))
+                                    .replace('$kr', String(round(kr / matches)))
+                                    .replace('$hspercent', String(round(headshots / matches) + "%"))
                                 res.send(format)
                                 console.log(`%c /avg %c Zwrócono statystyki gracza %c${req.params.playerName}%c.`, 'background: #00ff33; color: #000;', 'color: #fff', 'color: #47ff6c', 'color: #fff;')
-                            } else {
-                                res.send(`Wystąpił błąd. Spróbuj ponownie później.`)
-                                console.log(`%c /avg %c %c ${response.status} %c Wystąpił błąd: %c${await response.text()}`, 'background: #ff1c1c; color: #fff;', 'color: #fff', 'background: #ff1c1c; color: #fff;', 'color: #fff;', 'color: #ff4a4a')
                             }
-                        }).catch((err)=>handleError(err, res))
-                    } else {
-                        res.send(`Wystąpił błąd. Spróbuj ponownie później.`)
-                        console.log(`%c /avg %c %c ${response.status} %c Wystąpił błąd: %c${await response.text()}`, 'background: #ff1c1c; color: #fff;', 'color: #fff', 'background: #ff1c1c; color: #fff;', 'color: #fff;', 'color: #ff4a4a')
-                    }
-                }).catch((err)=>handleError(err, res))
-
-
-            }
+                        } else {
+                            res.send(`Wystąpił błąd. Spróbuj ponownie później.`)
+                            console.log(`%c /avg %c %c ${response.status} %c Wystąpił błąd: %c${await response.text()}`, 'background: #ff1c1c; color: #fff;', 'color: #fff', 'background: #ff1c1c; color: #fff;', 'color: #fff;', 'color: #ff4a4a')
+                        }
+                    }).catch((err)=>handleError(err, res))
+                } else {
+                    res.send(`Wystąpił błąd. Spróbuj ponownie później.`)
+                    console.log(`%c /avg %c %c ${response.status} %c Wystąpił błąd: %c${await response.text()}`, 'background: #ff1c1c; color: #fff;', 'color: #fff', 'background: #ff1c1c; color: #fff;', 'color: #fff;', 'color: #ff4a4a')
+                }
+            }).catch((err)=>handleError(err, res))
         } else {
             if (response.status === 404) {
                 res.send(`Nie znaleziono gracza ${req.params.playerName} na FACEIT.`)
