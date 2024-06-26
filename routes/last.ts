@@ -49,6 +49,7 @@ lastRoute.get('/:playerName', (req, res) => {
                 return
             }else{
                 const playerId = playersResponse.player_id
+                const playerElo = playersResponse.games.cs2.faceit_elo
                 fetch(`https://www.faceit.com/api/stats/v1/stats/time/users/${playerId}/games/cs2?size=20`, {headers}).then(async response => {
                     if (response.ok) {
                         let matches = await response.json() as Matchv1[]
@@ -80,7 +81,7 @@ lastRoute.get('/:playerName', (req, res) => {
                                     const player = playersTeam.players.filter(player => player.player_id === playerId)[0]
 
                                     let format = req.query.format as string | undefined || `Mapa: $map, Wynik: $score ($result), ELO: $diff, Zabójstwa: $kills ($hspercent% HS), Śmierci: $deaths, K/D: $kd, ADR: $adr`
-                                    const eloDiff = matches.length >= 2 ? parseInt(matches[0].elo) - parseInt(matches[1].elo) : 0
+                                    const eloDiff = matches.length >= 2 ? isNaN(parseInt(matches[0].elo)) ? playerElo - parseInt(matches[1].elo) : parseInt(matches[0].elo) - parseInt(matches[1].elo) : 0
                                     format = format
                                         .replace('$result',
                                             matchStats.rounds[0].round_stats.Winner === playersTeam.team_id ? "Wygrana" : "Przegrana")
