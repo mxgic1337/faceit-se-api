@@ -1,7 +1,9 @@
 import express from 'express'
-import {handleError, headers, HistoryResponse, PlayersResponse} from "../server";
+import {handleError, headers, PlayersResponse} from "../server";
 
 export const avgRoute = express.Router()
+
+export const COMPETITION_ID = "f4148ddd-bce8-41b8-9131-ee83afcdd6dd";
 
 interface StatsResponse {
     items: {
@@ -30,7 +32,7 @@ avgRoute.get('/:playerName', (req, res) => {
                 if (response.ok) {
                     const statsResponse = await response.json() as StatsResponse
                     let matches_stats = statsResponse.items;
-                    matches_stats = matches_stats.filter(match => match.stats['Competition Id'] === "f4148ddd-bce8-41b8-9131-ee83afcdd6dd")
+                    matches_stats = matches_stats.filter(match => match.stats['Competition Id'] === COMPETITION_ID)
 
                     if (matches_stats.length === 0) {
                         res.send(`Nie znaleziono gier z których można wyliczyć średnią.`)
@@ -61,7 +63,7 @@ avgRoute.get('/:playerName', (req, res) => {
                         console.log(`%c /avg %c Zwrócono statystyki gracza %c${req.params.playerName}%c.`, 'background: #00ff33; color: #000;', 'color: #fff', 'color: #47ff6c', 'color: #fff;')
                     }
                 } else {
-                    res.send(`Wystąpił błąd. Spróbuj ponownie później.`)
+                    res.send(`Wystąpił błąd. Spróbuj ponownie później. (Serwer zwrócił kod: ${response.status})`)
                     console.log(`%c /avg %c %c ${response.status} %c Wystąpił błąd: %c${await response.text()}`, 'background: #ff1c1c; color: #fff;', 'color: #fff', 'background: #ff1c1c; color: #fff;', 'color: #fff;', 'color: #ff4a4a')
                 }
             }).catch((err)=>handleError(err, res))
@@ -70,7 +72,7 @@ avgRoute.get('/:playerName', (req, res) => {
                 res.send(`Nie znaleziono gracza ${req.params.playerName} na FACEIT.`)
                 console.log(`%c /avg %c %c 404 %c Nie znaleziono gracza %c${req.params.playerName}`, 'background: #ff1c1c; color: #fff;', 'color: #fff', 'background: #ff1c1c; color: #fff;', 'color: #fff;', 'color: #ff4a4a')
             } else {
-                res.send(`Wystąpił błąd. Spróbuj ponownie później.`)
+                res.send(`Wystąpił błąd. Spróbuj ponownie później. (Serwer zwrócił kod: ${response.status})`)
                 console.log(`%c /avg %c %c ${response.status} %c Wystąpił błąd: %c${await response.text()}`, 'background: #ff1c1c; color: #fff;', 'color: #fff', 'background: #ff1c1c; color: #fff;', 'color: #fff;', 'color: #ff4a4a')
             }
         }

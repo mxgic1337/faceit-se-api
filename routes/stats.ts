@@ -1,17 +1,17 @@
 import express from 'express'
 import {handleError, headers, PlayersResponse} from "../server";
+import {COMPETITION_ID} from "./avg";
 
 export const statsRoute = express.Router()
 
 export interface Matchv1 {
+    matchId: string
     teamId: string,
     i2: string,
     elo: string,
     competitionId: string
     created_at: number
 }
-
-const competitionId = 'f4148ddd-bce8-41b8-9131-ee83afcdd6dd'
 
 statsRoute.get('/:playerName', (req, res) => {
     console.log(`%c /stats %c Pobieranie statystyk gracza %c${req.params.playerName}%c...`, 'background: #002fff; color: #fff;', 'color: #fff', 'color: #4a6bff', 'color: #fff;')
@@ -49,8 +49,8 @@ statsRoute.get('/:playerName', (req, res) => {
                         let wins = 0
                         let losses = 0
 
-                        const todayMatches = matches.filter(match => startDate.getTime() <= match.created_at && match.competitionId === competitionId)
-                        matches = matches.filter(match => !todayMatches.includes(match) && match.competitionId === competitionId)
+                        const todayMatches = matches.filter(match => startDate.getTime() <= match.created_at && match.competitionId === COMPETITION_ID)
+                        matches = matches.filter(match => !todayMatches.includes(match) && match.competitionId === COMPETITION_ID)
 
                         let eloDiff = 0
                         if (todayMatches.length > 0) {
@@ -88,7 +88,7 @@ statsRoute.get('/:playerName', (req, res) => {
                         }
                         console.log(`%c /stats %c Zwrócono statystyki gracza %c${req.params.playerName}%c.`, 'background: #00ff33; color: #000;', 'color: #fff', 'color: #47ff6c', 'color: #fff;')
                     } else {
-                        res.send(`Wystąpił błąd. Spróbuj ponownie później.`)
+                        res.send(`Wystąpił błąd. Spróbuj ponownie później. (Serwer zwrócił kod: ${response.status})`)
                         console.log(`%c /stats %c %c ${response.status} %c Wystąpił błąd: %c${await response.text()}`, 'background: #ff1c1c; color: #fff;', 'color: #fff', 'background: #ff1c1c; color: #fff;', 'color: #fff;', 'color: #ff4a4a')
                     }
                 }).catch((err)=>handleError(err, res))
@@ -98,7 +98,7 @@ statsRoute.get('/:playerName', (req, res) => {
                 res.send(`Nie znaleziono gracza ${req.params.playerName} na FACEIT.`)
                 console.log(`%c /stats %c %c 404 %c Nie znaleziono gracza %c${req.params.playerName}`, 'background: #ff1c1c; color: #fff;', 'color: #fff', 'background: #ff1c1c; color: #fff;', 'color: #fff;', 'color: #ff4a4a')
             } else {
-                res.send(`Wystąpił błąd. Spróbuj ponownie później.`)
+                res.send(`Wystąpił błąd. Spróbuj ponownie później. (Serwer zwrócił kod: ${response.status})`)
                 console.log(`%c /stats %c %c ${response.status} %c Wystąpił błąd: %c${await response.text()}`, 'background: #ff1c1c; color: #fff;', 'color: #fff', 'background: #ff1c1c; color: #fff;', 'color: #fff;', 'color: #ff4a4a')
             }
         }
