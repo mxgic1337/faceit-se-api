@@ -1,5 +1,5 @@
 import express from 'express'
-import {handleError, headers, PlayersResponse} from "../server";
+import {handleError, HEADERS, HEADERS_NO_AUTHORIZATION, PlayersResponse} from "../server";
 import {COMPETITION_ID} from "./avg";
 
 export const statsRoute = express.Router()
@@ -17,7 +17,7 @@ statsRoute.get('/:playerName', (req, res) => {
     console.log(`%c /stats %c Pobieranie statystyk gracza %c${req.params.playerName}%c...`, 'background: #002fff; color: #fff;', 'color: #fff', 'color: #4a6bff', 'color: #fff;')
 
     fetch(`https://open.faceit.com/data/v4/players?nickname=${req.params.playerName}&game=cs2`, {
-        headers: headers
+        headers: HEADERS
     }).then(async response => {
         if (response.ok) {
             const playersResponse = (await response.json() as PlayersResponse)
@@ -42,7 +42,7 @@ statsRoute.get('/:playerName', (req, res) => {
                     size = 500
                 }
 
-                fetch(`https://www.faceit.com/api/stats/v1/stats/time/users/${playerId}/games/cs2?size=${size}`).then(async response => {
+                fetch(`https://www.faceit.com/api/stats/v1/stats/time/users/${playerId}/games/cs2?size=${size}`, {headers: HEADERS_NO_AUTHORIZATION}).then(async response => {
                     if (response.ok) {
                         let matches = await response.json() as Matchv1[]
 

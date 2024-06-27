@@ -9,56 +9,6 @@ const app = express()
 
 dotenv.configDotenv()
 
-export interface HistoryResponse {
-    end: number,
-    from: number,
-    start: number,
-    to: number,
-    items: Match[]
-}
-
-export interface Match {
-    competition_id: string;
-    competition_name: string;
-    competition_type: string;
-    faceit_url: string;
-    finished_at: number;
-    game_id: string;
-    game_mode: string;
-    match_id: string;
-    match_type: string;
-    max_players: number;
-    organizer_id: string;
-    playing_players: string[];
-    region: string;
-    results: {
-        score: {
-            [key: string]: number;
-        };
-        winner: string;
-    };
-    started_at: number;
-    status: string;
-    teams: {
-        [key: string]: {
-            avatar: string;
-            nickname: string;
-            players: {
-                avatar: string;
-                faceit_url: string;
-                game_player_id: string;
-                game_player_name: string;
-                nickname: string;
-                player_id: string;
-                skill_level: number;
-            }[];
-            team_id: string;
-            type: string;
-        };
-    };
-    teams_size: number;
-}
-
 export interface PlayersResponse {
     player_id: string,
     nickname: string,
@@ -72,8 +22,13 @@ export interface CS2Stats {
     skill_level: number,
 }
 
-export const headers = {
-    Authorization: `Bearer ${process.env.API_KEY}`
+export const HEADERS = {
+    "User-Agent": `mxgic1337/faceit-se-api/${packageJSON.version} (mxgic1337.xyz)`,
+    "Authorization": `Bearer ${process.env.API_KEY}`
+}
+
+export const HEADERS_NO_AUTHORIZATION = {
+    "User-Agent": `mxgic1337/faceit-se-api/${packageJSON.version} (mxgic1337.xyz)`,
 }
 
 app.get('/', (req, res) => {
