@@ -53,7 +53,6 @@ lastRoute.get('/:playerName', (req, res) => {
                 fetch(`https://www.faceit.com/api/stats/v1/stats/time/users/${playerId}/games/cs2?size=20`, {headers: HEADERS_NO_AUTHORIZATION}).then(async response => {
                     if (response.ok) {
                         let matches = await response.json() as Matchv1[]
-                        matches = matches.filter(match => match.competitionId === COMPETITION_ID)
 
                         if (matches.length === 0) {
                             res.send('Nie znaleziono meczu z którego można wyliczyć statystyki.')

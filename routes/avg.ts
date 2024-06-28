@@ -13,6 +13,7 @@ interface StatsResponse {
             "K/R Ratio": string,
             "Headshots %": string,
             "Match Id": string,
+            "ADR": string,
             "Competition Id": string,
         }
     }[]
@@ -42,6 +43,7 @@ avgRoute.get('/:playerName', (req, res) => {
                         let kd = 0
                         let kr = 0
                         let headshots = 0
+                        let adr = 0
                         let matches = 0
 
                         for (const match of matches_stats) {
@@ -50,14 +52,16 @@ avgRoute.get('/:playerName', (req, res) => {
                             kd += parseFloat(match.stats["K/D Ratio"])
                             kr += parseFloat(match.stats["K/R Ratio"])
                             headshots += parseFloat(match.stats["Headshots %"])
+                            if (match.stats["ADR"]) adr += parseFloat(match.stats["ADR"])
                             matches++;
                         }
 
-                        let format = req.query.format as string | undefined || `Zabójstwa: $kills, K/D: $kd, K/R: $kr, % headshotów: $hspercent`
+                        let format = req.query.format as string | undefined || `Zabójstwa: $kills, K/D: $kd, K/R: $kr, ADR: $adr, % headshotów: $hspercent`
                         format = format
                             .replace('$kills', String(round(kills / matches)))
                             .replace('$kd', String(round(kd / matches)))
                             .replace('$kr', String(round(kr / matches)))
+                            .replace('$adr', String(round(adr / matches)))
                             .replace('$hspercent', String(round(headshots / matches) + "%"))
                         res.send(format)
                         console.log(`%c /avg %c Zwrócono statystyki gracza %c${req.params.playerName}%c.`, 'background: #00ff33; color: #000;', 'color: #fff', 'color: #47ff6c', 'color: #fff;')
