@@ -1,5 +1,5 @@
 import express from 'express'
-import {handleError, HEADERS, PlayersResponse} from "../server";
+import {clog, handleError, HEADERS, PlayersResponse} from "../server";
 
 export const avgRoute = express.Router()
 
@@ -20,8 +20,6 @@ interface StatsResponse {
 }
 
 avgRoute.get('/:playerName', (req, res) => {
-    console.log(`%c /avg %c Pobieranie statystyk gracza %c${req.params.playerName}%c...`, 'background: #002fff; color: #fff;', 'color: #fff', 'color: #4a6bff', 'color: #fff;')
-
     fetch(`https://open.faceit.com/data/v4/players?nickname=${req.params.playerName}&game=cs2`, {
         headers: HEADERS
     }).then(async response => {
@@ -31,7 +29,6 @@ avgRoute.get('/:playerName', (req, res) => {
 
             if (!playersResponse.games.cs2) {
                 res.send(`Ten gracz nigdy nie grał w CS2 na FACEIT.`)
-                console.log(`%c /avg %c Gracz %c${req.params.playerName}%c nigdy nie grał w CS2 na FACEIT.`, 'background: #002fff; color: #fff;', 'color: #fff', 'color: #4a6bff', 'color: #fff;')
             }else{
                 const playerLevel = playersResponse.games.cs2.skill_level
                 fetch(`https://open.faceit.com/data/v4/players/${playerId}/games/cs2/stats?offset=0&limit=50`, {headers: HEADERS}).then(async response => {
@@ -42,7 +39,6 @@ avgRoute.get('/:playerName', (req, res) => {
 
                         if (matches_stats.length === 0) {
                             res.send(`Nie znaleziono gier z których można wyliczyć średnią.`)
-                            console.log(`%c /avg %c %cWystąpił błąd: Nie znaleziono gier z których można wyliczyć średnią.`, 'background: #ff1c1c; color: #fff;', 'color: #fff', 'background: #ff1c1c; color: #fff;', 'color: #fff;', 'color: #ff4a4a')
                         }else{
                             let kills = 0
                             let kd = 0
@@ -70,21 +66,19 @@ avgRoute.get('/:playerName', (req, res) => {
                                 .replace('$adr', String(round(adr / matches)))
                                 .replace('$hspercent', String(round(headshots / matches) + "%"))
                             res.send(format)
-                            console.log(`%c /avg %c Zwrócono statystyki gracza %c${req.params.playerName}%c.`, 'background: #00ff33; color: #000;', 'color: #fff', 'color: #47ff6c', 'color: #fff;')
                         }
                     } else {
                         res.send(`Wystąpił błąd. Spróbuj ponownie później. (Serwer zwrócił kod: ${response.status})`)
-                        console.log(`%c /avg %c %c ${response.status} %c Wystąpił błąd: %c${await response.text()}`, 'background: #ff1c1c; color: #fff;', 'color: #fff', 'background: #ff1c1c; color: #fff;', 'color: #fff;', 'color: #ff4a4a')
+                        clog('/avg', 'error', `${await response.text()} (${response.status})`)
                     }
                 }).catch((err)=>handleError(err, res))
             }
         } else {
             if (response.status === 404) {
-                res.send(`Nie znaleziono gracza ${req.params.playerName} na FACEIT.`)
-                console.log(`%c /avg %c %c 404 %c Nie znaleziono gracza %c${req.params.playerName}`, 'background: #ff1c1c; color: #fff;', 'color: #fff', 'background: #ff1c1c; color: #fff;', 'color: #fff;', 'color: #ff4a4a')
+                res.send(`Nie znaleziono gracza ${req.params.playerName} na FACEIT. Wielkość liter w nicku ma znaczenie.`)
             } else {
                 res.send(`Wystąpił błąd. Spróbuj ponownie później. (Serwer zwrócił kod: ${response.status})`)
-                console.log(`%c /avg %c %c ${response.status} %c Wystąpił błąd: %c${await response.text()}`, 'background: #ff1c1c; color: #fff;', 'color: #fff', 'background: #ff1c1c; color: #fff;', 'color: #fff;', 'color: #ff4a4a')
+                clog('/avg', 'error', `${await response.text()} (${response.status})`)
             }
         }
     }).catch((err)=>handleError(err, res))

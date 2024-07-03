@@ -4,6 +4,7 @@ import {statsRoute} from "./routes/stats";
 import {avgRoute} from "./routes/avg";
 import {lastRoute} from "./routes/last";
 import packageJSON from "./package.json"
+import {liveRoute} from "./routes/live";
 
 const app = express()
 
@@ -53,6 +54,7 @@ app.get('/', (req, res) => {
 
 app.use('/stats', statsRoute)
 app.use('/last', lastRoute)
+app.use('/live', liveRoute)
 app.use('/avg', avgRoute)
 
 export function handleError(err: Error, res: express.Response) {
@@ -60,11 +62,16 @@ export function handleError(err: Error, res: express.Response) {
     console.error(err)
 }
 
+export function clog(source: string, type: 'info' | 'warn' | 'error', message: string) {
+    console.log(`[${source}] [${type.toUpperCase()}] ${message}`)
+}
+
 if (!process.env.API_KEY) {
-    console.log(`%c Serwer %c Nie znaleziono klucza API (%cAPI_KEY%c) w pliku %c.env%c.`, 'background: #ff1c1c; color: #fff;', 'color: #fff;', 'color: #ff4a4a', 'color: #fff;', 'color: #ff4a4a', 'color: #fff;')
+    clog('Serwer', 'error', `Nie znaleziono API_KEY w pliku .env.`)
 } else {
     if (!process.env.PORT) {
-        console.log(`%c Serwer %c Nie znaleziono portu (%cPORT%c) w pliku %c.env%c. Używam portu 80.`, 'background: #ff8000; color: #fff;', 'color: #fff;', 'color: #ffa347', 'color: #fff;', 'color: #ffa347', 'color: #fff;')
+        clog('Serwer', 'warn', `Nie znaleziono PORT w pliku .env.`)
     }
     app.listen(process.env.PORT || 80)
+    clog('Serwer', 'info', `Uruchomiono serwer na porcie ${process.env.PORT || 80}.`)
 }

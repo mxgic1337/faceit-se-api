@@ -1,5 +1,5 @@
 import express from 'express'
-import {handleError, HEADERS, HEADERS_NO_AUTHORIZATION, PlayersResponse} from "../server";
+import {clog, handleError, HEADERS, HEADERS_NO_AUTHORIZATION, PlayersResponse} from "../server";
 import {Matchv1} from "./stats";
 import {COMPETITION_ID} from "./avg";
 
@@ -35,8 +35,6 @@ interface MatchStatsTeam {
 }
 
 lastRoute.get('/:playerName', (req, res) => {
-    console.log(`%c /last %c Pobieranie statystyk gracza %c${req.params.playerName}%c...`, 'background: #002fff; color: #fff;', 'color: #fff', 'color: #4a6bff', 'color: #fff;')
-
     fetch(`https://open.faceit.com/data/v4/players?nickname=${req.params.playerName}&game=cs2`, {
         headers: HEADERS
     }).then(async response => {
@@ -45,7 +43,6 @@ lastRoute.get('/:playerName', (req, res) => {
 
             if (!playersResponse.games.cs2) {
                 res.send(`Ten gracz nigdy nie grał w CS2 na FACEIT.`)
-                console.log(`%c /last %c Gracz %c${req.params.playerName}%c nigdy nie grał w CS2 na FACEIT.`, 'background: #002fff; color: #fff;', 'color: #fff', 'color: #4a6bff', 'color: #fff;')
                 return
             }else{
                 const playerId = playersResponse.player_id
@@ -95,26 +92,24 @@ lastRoute.get('/:playerName', (req, res) => {
                                         .replace('$hspercent', String(player.player_stats["Headshots %"]))
                                         .replace('$diff', String(eloDiff > 0 ? `+${eloDiff}` : eloDiff))
                                     res.send(format)
-                                    console.log(`%c /last %c Zwrócono statystyki gracza %c${req.params.playerName}%c.`, 'background: #00ff33; color: #000;', 'color: #fff', 'color: #47ff6c', 'color: #fff;')
                                 }else{
                                     res.send(`Wystąpił błąd podczas szukania statystyk. Spróbuj ponownie później.`)
-                                    console.log(`%c /last %c %c ${response.status} %c Wystąpił błąd: %c${await response.text()}`, 'background: #ff1c1c; color: #fff;', 'color: #fff', 'background: #ff1c1c; color: #fff;', 'color: #fff;', 'color: #ff4a4a')
+                                    clog('/last', 'error', `${await response.text()} (${response.status})`)
                                 }
                             }).catch((err)=>handleError(err, res))
                         }
                     }else{
                         res.send(`Wystąpił błąd podczas szukania historii meczów. Spróbuj ponownie później. (Serwer zwrócił kod: ${response.status})`)
-                        console.log(`%c /last %c %c ${response.status} %c Wystąpił błąd: %c${await response.text()}`, 'background: #ff1c1c; color: #fff;', 'color: #fff', 'background: #ff1c1c; color: #fff;', 'color: #fff;', 'color: #ff4a4a')
+                        clog('/last', 'error', `${await response.text()} (${response.status})`)
                     }
                 }).catch((err)=>handleError(err, res))
             }
         } else {
             if (response.status === 404) {
-                res.send(`Nie znaleziono gracza ${req.params.playerName} na FACEIT.`)
-                console.log(`%c /last %c %c 404 %c Nie znaleziono gracza %c${req.params.playerName}`, 'background: #ff1c1c; color: #fff;', 'color: #fff', 'background: #ff1c1c; color: #fff;', 'color: #fff;', 'color: #ff4a4a')
+                res.send(`Nie znaleziono gracza ${req.params.playerName} na FACEIT. Wielkość liter w nicku ma znaczenie.`)
             } else {
                 res.send(`Wystąpił błąd. Spróbuj ponownie później. (Serwer zwrócił kod: ${response.status})`)
-                console.log(`%c /last %c %c ${response.status} %c Wystąpił błąd: %c${await response.text()}`, 'background: #ff1c1c; color: #fff;', 'color: #fff', 'background: #ff1c1c; color: #fff;', 'color: #fff;', 'color: #ff4a4a')
+                clog('/last', 'error', `${await response.text()} (${response.status})`)
             }
         }
     }).catch((err)=>handleError(err, res))
