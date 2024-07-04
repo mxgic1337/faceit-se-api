@@ -23,7 +23,11 @@ To pozwoli twoim widzom sprawdzić średnie statystyki graczy (avg. K/D, kille i
 ```
 To pozwoli twoim widzom sprawdzić statystyki z ostatniej gry danego gracza (avg. K/D, kille itp.) poprzez użycie komendy **!last**.
 
-## Linki
-- [Dokumentacja](https://docs.mxgic1337.xyz/faceit-stats-api/#/)
+### Konfiguracja komendy !live
+- Na swoim czacie wpisz komendę:
+```
+!cmd add live @${sender}, Aktualny mecz ${pathescape ${1} | <Twój nick z FACEIT>}: $(customapi. 'fc.mxgic1337.xyz/live/${pathescape ${1} | <Twój nick z FACEIT>}')
+```
+To pozwoli twoim widzom sprawdzić wynik aktualnego meczu za pomocą komendy **!live**.
 
 Projekt nie jest powiązany z **FACEIT** lub/i **StreamElements**.
