@@ -47,7 +47,7 @@ liveRoute.get('/:playerName', (req, res) => {
 
                 format = format
                     .replace('$name', player.username)
-                    .replace('$map', match.maps[0].game_map_id)
+                    .replace('$map', match.voting.map.pick[0])
                     .replace('$team1elo', String(Math.round(team1Elo/match.teams.faction1.roster.length)))
                     .replace('$team1result', match.results ? String(match.results[0].factions.faction1.score) : "0")
                     .replace('$team', (match.teams as any)[`faction${playerTeam}`].name)

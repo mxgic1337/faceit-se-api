@@ -96,9 +96,11 @@ export interface Matchv2 {
         faction1: Matchv2Team,
         faction2: Matchv2Team,
     },
-    maps: {
-        game_map_id: string,
-    }[]
+    voting: {
+        map: {
+            pick: string[]
+        }
+    },
     results: {
         factions: {
             faction1: {score: number},
