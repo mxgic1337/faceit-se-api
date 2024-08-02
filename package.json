@@ -1,6 +1,6 @@
 {
   "name": "faceit-se-api",
-  "version": "0.7.1",
+  "version": "1.0.0",
   "description": "",
   "main": "server.js",
   "repository": {

@@ -23,15 +23,6 @@ export interface CS2Stats {
     skill_level: number,
 }
 
-export const HEADERS = {
-    "User-Agent": `mxgic1337/faceit-se-api/${packageJSON.version} (mxgic1337.xyz)`,
-    "Authorization": `Bearer ${process.env.API_KEY}`
-}
-
-export const HEADERS_NO_AUTHORIZATION = {
-    "User-Agent": `mxgic1337/faceit-se-api/${packageJSON.version} (mxgic1337.xyz)`,
-}
-
 app.get('/', (req, res) => {
     res.send(`
     <h1>Witaj!</h1>
@@ -62,16 +53,12 @@ export function handleError(err: Error, res: express.Response) {
     console.error(err)
 }
 
-export function clog(source: string, type: 'info' | 'warn' | 'error', message: string) {
-    console.log(`[${source}] [${type.toUpperCase()}] ${message}`)
-}
-
 if (!process.env.API_KEY) {
-    clog('Serwer', 'error', `Nie znaleziono API_KEY w pliku .env.`)
+    console.error("Nie znaleziono API_KEY w pliku .env.")
 } else {
     if (!process.env.PORT) {
-        clog('Serwer', 'warn', `Nie znaleziono PORT w pliku .env.`)
+        console.warn("Nie znaleziono PORT w pliku .env.")
     }
     app.listen(process.env.PORT || 80)
-    clog('Serwer', 'info', `Uruchomiono serwer na porcie ${process.env.PORT || 80}.`)
+    console.log(`Uruchomiono serwer na porcie ${process.env.PORT || 80}.`)
 }
