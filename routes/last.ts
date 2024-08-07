@@ -1,6 +1,7 @@
 import express from 'express'
 import {findUserProfile, getMatchStatsV4, getPlayerMatchHistory, MatchStatsTeam} from "../util/user_util";
 import {handleError} from "../server";
+import {COMPETITION_ID} from "./avg";
 
 export const lastRoute = express.Router()
 
@@ -17,7 +18,7 @@ lastRoute.get('/:playerName', (req, res) => {
         }
 
         getPlayerMatchHistory(player.id).then(matches => {
-            matches = matches.filter(match => match.elo)
+            matches = matches.filter(match => match.elo || match.competitionId === COMPETITION_ID)
             if (matches.length === 0) {
                 res.send('Nie znaleziono meczu z którego można wyliczyć statystyki.')
                 return
