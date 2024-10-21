@@ -65,17 +65,7 @@ statsRoute.get('/:playerName', (req, res) => {
                 .replace('$diff', String(eloDiff > 0 ? `+${eloDiff}` : eloDiff))
                 .replace('$wins', String(wins))
                 .replace('$losses', String(losses))
-            if (format === 'json') {
-                res.json({
-                    level: player.level,
-                    elo: player.elo,
-                    diff: eloDiff,
-                    wins: wins,
-                    losses: losses,
-                })
-            } else {
-                res.send(format)
-            }
+            res.send(format)
         }).catch(err => {handleError(err, res)})
     }).catch(err => {handleError(err, res)})
 })
