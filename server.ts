@@ -7,6 +7,7 @@ import packageJSON from "./package.json"
 import {liveRoute} from "./routes/live";
 
 const app = express()
+app.use(express.static('public'))
 
 dotenv.configDotenv()
 
