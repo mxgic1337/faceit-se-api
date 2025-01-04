@@ -41,7 +41,7 @@ func StatsErrorMessage(w http.ResponseWriter, route string, username string, err
 		fmt.Fprintf(w, "Player %s not found.", username)
 	} else {
 		fmt.Fprintf(w, "An unknown error occured. Try again later!")
-		fmt.Printf("[/stats] Error: %s\n", err.Error())
+		fmt.Printf("[%s] Error: %s\n", route, err.Error())
 	}
 }
 
