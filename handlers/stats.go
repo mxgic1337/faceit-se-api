@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net/http"
 	"strconv"
+	"strings"
 	"time"
 )
 
@@ -61,5 +62,16 @@ func StatsHandler(w http.ResponseWriter, r *http.Request) {
 		diffStr = fmt.Sprintf("%v", diff)
 	}
 
-	fmt.Fprintf(w, "LVL: %v, ELO: %v (%s), Matches: %vW/%vL", player.Games.CS2.Level, player.Games.CS2.Elo, diffStr, wins, losses)
+	format := r.URL.Query().Get("format")
+	if format == "" {
+		format = "LVL: $lvl, ELO: $elo ($diff), Matches: $winsW/$lossesL"
+	}
+	format = strings.Replace(format, "$name", player.Username, -1)
+	format = strings.Replace(format, "$lvl", strconv.Itoa(player.Games.CS2.Level), -1)
+	format = strings.Replace(format, "$elo", strconv.Itoa(player.Games.CS2.Elo), -1)
+	format = strings.Replace(format, "$diff", diffStr, -1)
+	format = strings.Replace(format, "$wins", strconv.Itoa(wins), -1)
+	format = strings.Replace(format, "$losses", strconv.Itoa(losses), -1)
+
+	fmt.Fprintf(w, "%s", format)
 }
