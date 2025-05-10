@@ -34,7 +34,7 @@ avgRoute.get('/:playerName', (req, res) => {
             let matches = 0
 
             for (const match of matches_stats) {
-                if (matches >= 20) continue
+                if (matches >= 30) continue
                 kills += parseInt(match.stats.Kills)
                 kd += parseFloat(match.stats["K/D Ratio"])
                 kr += parseFloat(match.stats["K/R Ratio"])
