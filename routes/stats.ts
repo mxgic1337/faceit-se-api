@@ -64,7 +64,7 @@ statsRoute.get('/:playerName', (req, res) => {
 
             for (const match of todayMatches) {
               if (match.i2 === match.teamId) {
-                wins += 1;
+                wins++;
               } else {
                 losses++;
               }

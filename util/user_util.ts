@@ -11,17 +11,17 @@ import { PlayersResponse } from '../server';
 /** Informacje o graczu */
 type FACEITPlayer =
   | {
-      id: string;
-      username: string;
-      playsCS2: true;
-      elo: number;
-      level: number;
-    }
+    id: string;
+    username: string;
+    playsCS2: true;
+    elo: number;
+    level: number;
+  }
   | {
-      id: string;
-      username: string;
-      playsCS2: false;
-    };
+    id: string;
+    username: string;
+    playsCS2: false;
+  };
 
 /** Informacje o meczu zwracane przez API v1 */
 export interface Matchv1 {
@@ -183,6 +183,7 @@ export function getPlayerMatchHistory(id: string, size: number = 20) {
       .then(async (response) => {
         if (response.ok) {
           let matches = (await response.json()) as Matchv1[];
+          matches = matches.filter(match => match.elo !== undefined);
           resolve(matches);
         } else {
           reject(`${response.status} ${response.statusText}`);
