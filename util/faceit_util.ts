@@ -6,7 +6,7 @@ export const FACEIT_URL_BASE_V1_MATCH = 'https://www.faceit.com/api/match/v1';
 export const FACEIT_URL_BASE_V2_MATCH = 'https://www.faceit.com/api/match/v2';
 export const FACEIT_URL_BASE_V4 = 'https://open.faceit.com/data/v4';
 
-dotenv.configDotenv();
+dotenv.config();
 
 export const HEADERS = {
   'User-Agent': `${packageJSON.author}/${packageJSON.name}/${packageJSON.version} (mxgic1337.xyz)`,

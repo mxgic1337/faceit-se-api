@@ -11,17 +11,17 @@ import { PlayersResponse } from '../server';
 /** Informacje o graczu */
 type FACEITPlayer =
   | {
-    id: string;
-    username: string;
-    playsCS2: true;
-    elo: number;
-    level: number;
-  }
+      id: string;
+      username: string;
+      playsCS2: true;
+      elo: number;
+      level: number;
+    }
   | {
-    id: string;
-    username: string;
-    playsCS2: false;
-  };
+      id: string;
+      username: string;
+      playsCS2: false;
+    };
 
 /** Informacje o meczu zwracane przez API v1 */
 export interface Matchv1 {
@@ -183,7 +183,7 @@ export function getPlayerMatchHistory(id: string, size: number = 20) {
       .then(async (response) => {
         if (response.ok) {
           let matches = (await response.json()) as Matchv1[];
-          matches = matches.filter(match => match.elo !== undefined);
+          matches = matches.filter((match) => match.elo !== undefined);
           resolve(matches);
         } else {
           reject(`${response.status} ${response.statusText}`);
@@ -244,7 +244,7 @@ export function getMatchStatsV4(matchId: string) {
  * @param id ID gracza od którego mają zostać pobrane statystyki
  * @param size Ilość meczów z których mają zostać pobrane statystyki
  */
-export function getPlayerMatchStatsBulk(id: string, size: number = 20) {
+export function getPlayerMatchStatsBulk(id: string, size: number = 100) {
   return new Promise<Stats[]>((resolve, reject) => {
     fetch(
       `${FACEIT_URL_BASE_V4}/players/${id}/games/cs2/stats?offset=0&limit=${size}`,

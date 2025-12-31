@@ -22,12 +22,12 @@ avgRoute.get('/:playerName', (req, res) => {
       }
 
       getPlayerMatchStatsBulk(player.id)
-        .then((matches_stats) => {
-          matches_stats = matches_stats.filter(
+        .then((stats) => {
+          stats = stats.filter(
             (match) => match.stats['Competition Id'] === COMPETITION_ID
           );
 
-          if (matches_stats.length === 0) {
+          if (stats.length === 0) {
             res.send(`Nie znaleziono gier z których można wyliczyć średnią.`);
             return;
           }
@@ -39,7 +39,7 @@ avgRoute.get('/:playerName', (req, res) => {
           let adr = 0;
           let matches = 0;
 
-          for (const match of matches_stats) {
+          for (const match of stats) {
             if (matches >= 30) continue;
             kills += parseInt(match.stats.Kills);
             kd += parseFloat(match.stats['K/D Ratio']);
