@@ -1,44 +1,42 @@
-import {
-  faceitApiClient,
-} from './faceit_util';
+import { faceitApiClient } from './faceit_util';
 import { PlayersResponse } from '../server';
 
 interface ListResponse<T> {
-  items: T
+  items: T;
 }
 
 /** Informacje o graczu */
 type FACEITPlayer =
   | {
-    id: string;
-    username: string;
-    playsCS2: true;
-    elo: number;
-    level: number;
-  }
+      id: string;
+      username: string;
+      playsCS2: true;
+      elo: number;
+      level: number;
+    }
   | {
-    id: string;
-    username: string;
-    playsCS2: false;
-  };
+      id: string;
+      username: string;
+      playsCS2: false;
+    };
 
 /** Informacje o meczu zwracane przez API v4 */
 export interface Match {
   match_id: string;
   teams: {
-    faction1: Team,
-    faction2: Team,
+    faction1: Team;
+    faction2: Team;
   };
   results: {
-    winner: string
-  }
+    winner: string;
+  };
   competition_id: string;
   started_at: number;
 }
 
 interface Team {
-  team_id: string
-  players: { player_id: string }[]
+  team_id: string;
+  players: { player_id: string }[];
 }
 
 /** Statystyki gracza zwracane przez API v4 */
@@ -135,7 +133,8 @@ export function findUserProfile(
   username: string
 ): Promise<FACEITPlayer | undefined> {
   return new Promise<FACEITPlayer | undefined>((resolve, reject) => {
-    faceitApiClient.get(`/players?nickname=${username}`)
+    faceitApiClient
+      .get(`/players?nickname=${username}`)
       .then(async (res) => {
         const player = res.data as PlayersResponse;
         if (player.games.cs2) {
@@ -175,12 +174,15 @@ export function findUserProfile(
  */
 export function getPlayerMatchHistory(id: string, size: number = 20) {
   return new Promise<Match[]>((resolve, reject) => {
-    faceitApiClient.get(`/players/${id}/history?game=cs2&limit=${size}`).then((response) => {
-      let matches = (response.data as ListResponse<Match[]>).items;
-      resolve(matches);
-    }).catch(err => {
-      reject(err);
-    })
+    faceitApiClient
+      .get(`/players/${id}/history?game=cs2&limit=${size}`)
+      .then((response) => {
+        let matches = (response.data as ListResponse<Match[]>).items;
+        resolve(matches);
+      })
+      .catch((err) => {
+        reject(err);
+      });
   });
 }
 
@@ -190,7 +192,8 @@ export function getPlayerMatchHistory(id: string, size: number = 20) {
  */
 export function getMatchStatsV4(matchId: string) {
   return new Promise<MatchStatsResponse>((resolve, reject) => {
-    faceitApiClient.get(`/matches/${matchId}/stats`)
+    faceitApiClient
+      .get(`/matches/${matchId}/stats`)
       .then(async (response) => {
         resolve(response.data as MatchStatsResponse);
       })
@@ -207,9 +210,8 @@ export function getMatchStatsV4(matchId: string) {
  */
 export function getPlayerMatchStatsBulk(id: string, size: number = 100) {
   return new Promise<Stats[]>((resolve, reject) => {
-    faceitApiClient.get(
-      `/players/${id}/games/cs2/stats?offset=0&limit=${size}`
-    )
+    faceitApiClient
+      .get(`/players/${id}/games/cs2/stats?offset=0&limit=${size}`)
       .then(async (response) => {
         resolve((response.data as ListResponse<Stats[]>).items);
       })

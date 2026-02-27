@@ -53,10 +53,17 @@ statsRoute.get('/:playerName', (req, res) => {
             for (const match of todayMatches) {
               let teamId;
 
-              if (match.teams.faction1.players.find((teamPlayer) => teamPlayer.player_id === player.id)) {
+              if (
+                match.teams.faction1.players.find(
+                  (teamPlayer) => teamPlayer.player_id === player.id
+                )
+              ) {
                 teamId = 'faction1';
-              }
-              else if (match.teams.faction2.players.find((teamPlayer) => teamPlayer.player_id === player.id)) {
+              } else if (
+                match.teams.faction2.players.find(
+                  (teamPlayer) => teamPlayer.player_id === player.id
+                )
+              ) {
                 teamId = 'faction2';
               }
 

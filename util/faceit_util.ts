@@ -7,8 +7,7 @@ export const faceitApiClient = axios.create({
   baseURL: 'https://open.faceit.com/data/v4',
   timeout: 5000,
   headers: {
-    'Authorization': `Bearer ${process.env.API_KEY}`,
+    Authorization: `Bearer ${process.env.API_KEY}`,
     'User-Agent': `${packageJSON.author}/${packageJSON.name}/${packageJSON.version} (mxgic1337.xyz)`,
-  }
+  },
 });
-

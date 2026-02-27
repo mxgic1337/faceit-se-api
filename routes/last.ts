@@ -90,9 +90,7 @@ lastRoute.get('/:playerName', (req, res) => {
                   '$hspercent',
                   String(playerStats.player_stats['Headshots %'])
                 )
-                .replace(
-                  '$diff', '?'
-                );
+                .replace('$diff', '?');
               res.send(format);
             })
             .catch((err) => {
