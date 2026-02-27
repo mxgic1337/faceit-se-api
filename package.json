@@ -1,6 +1,6 @@
 {
   "name": "faceit-se-api",
-  "version": "1.1.1",
+  "version": "2.0.0",
   "description": "",
   "main": "server.js",
   "repository": {
@@ -16,6 +16,7 @@
   "author": "mxgic1337_",
   "license": "MIT",
   "dependencies": {
+    "axios": "^1.13.6",
     "dotenv": "^16.5.0",
     "express": "^5.2.0"
   },
