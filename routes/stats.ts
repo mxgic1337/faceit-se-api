@@ -45,25 +45,31 @@ statsRoute.get('/:playerName', (req, res) => {
 
           const todayMatches = matches.filter(
             (match) =>
-              startDate.getTime() <= match.created_at &&
-              match.competitionId === COMPETITION_ID
-          );
-          matches = matches.filter(
-            (match) =>
-              !todayMatches.includes(match) &&
-              match.competitionId === COMPETITION_ID
+              startDate.getTime() <= match.started_at * 1000 &&
+              match.competition_id === COMPETITION_ID
           );
 
-          let eloDiff = 0;
           if (todayMatches.length > 0) {
-            let startElo = parseInt(todayMatches[todayMatches.length - 1].elo);
-            if (matches.length > 0) {
-              startElo = parseInt(matches[0].elo);
-            }
-            eloDiff = player.elo - startElo;
-
             for (const match of todayMatches) {
-              if (match.i2 === match.teamId) {
+              let teamId;
+
+              if (
+                match.teams.faction1.players.find(
+                  (teamPlayer) => teamPlayer.player_id === player.id
+                )
+              ) {
+                teamId = 'faction1';
+              } else if (
+                match.teams.faction2.players.find(
+                  (teamPlayer) => teamPlayer.player_id === player.id
+                )
+              ) {
+                teamId = 'faction2';
+              }
+
+              if (!teamId) continue;
+
+              if (match.results.winner === teamId) {
                 wins++;
               } else {
                 losses++;
@@ -73,12 +79,12 @@ statsRoute.get('/:playerName', (req, res) => {
 
           let format =
             (req.query.format as string | undefined) ||
-            `LVL: $lvl, ELO: $elo ($diff), Mecze: $winsW / $lossesL`;
+            `LVL: $lvl, ELO: $elo, Mecze: $winsW / $lossesL`;
           format = format
             .replace('$name', player.username)
             .replace('$lvl', String(player.level))
             .replace('$elo', String(player.elo))
-            .replace('$diff', String(eloDiff > 0 ? `+${eloDiff}` : eloDiff))
+            .replace('$diff', String('?'))
             .replace('$wins', String(wins))
             .replace('$losses', String(losses));
           res.send(format);
