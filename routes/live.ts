@@ -4,6 +4,6 @@ export const liveRoute = express.Router();
 
 liveRoute.get('/:playerName', (_, res) => {
   res.send(
-    "Funkcja została wycofana ze względu na ostatnie zmiany w API FACEIT'a."
+    "Funkcja została wycofana ze względu na zmiany w API FACEIT'a."
   );
 });
