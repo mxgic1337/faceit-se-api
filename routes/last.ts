@@ -28,7 +28,7 @@ lastRoute.get('/:playerName', (req, res) => {
       getPlayerMatchHistory(player.id)
         .then((matches) => {
           matches = matches.filter(
-            (match) => match.elo || match.competitionId === COMPETITION_ID
+            (match) => match.competition_id === COMPETITION_ID
           );
           if (matches.length === 0) {
             res.send(
@@ -36,7 +36,7 @@ lastRoute.get('/:playerName', (req, res) => {
             );
             return;
           }
-          getMatchStatsV4(matches[0].matchId)
+          getMatchStatsV4(matches[0].match_id)
             .then((matchStats) => {
               let playersTeam: MatchStatsTeam | undefined = undefined;
               let enemyTeam: MatchStatsTeam | undefined = undefined;
@@ -68,13 +68,7 @@ lastRoute.get('/:playerName', (req, res) => {
 
               let format =
                 (req.query.format as string | undefined) ||
-                `Mapa: $map, Wynik: $score ($result), ELO: $diff, Zabójstwa: $kills ($hspercent% HS), Śmierci: $deaths, K/D: $kd, ADR: $adr`;
-              const eloDiff =
-                matches.length >= 2
-                  ? isNaN(parseInt(matches[0].elo))
-                    ? player.elo - parseInt(matches[1].elo)
-                    : parseInt(matches[0].elo) - parseInt(matches[1].elo)
-                  : 0;
+                `Mapa: $map, Wynik: $score ($result), Zabójstwa: $kills ($hspercent% HS), Śmierci: $deaths, K/D: $kd, ADR: $adr`;
               format = format
                 .replace('$name', player.username)
                 .replace(
@@ -96,10 +90,7 @@ lastRoute.get('/:playerName', (req, res) => {
                   '$hspercent',
                   String(playerStats.player_stats['Headshots %'])
                 )
-                .replace(
-                  '$diff',
-                  String(eloDiff > 0 ? `+${eloDiff}` : eloDiff)
-                );
+                .replace('$diff', '?');
               res.send(format);
             })
             .catch((err) => {

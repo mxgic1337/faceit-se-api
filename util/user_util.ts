@@ -1,12 +1,9 @@
-import {
-  FACEIT_URL_BASE_V1,
-  FACEIT_URL_BASE_V1_MATCH,
-  FACEIT_URL_BASE_V2_MATCH,
-  FACEIT_URL_BASE_V4,
-  HEADERS,
-  HEADERS_NO_AUTHORIZATION,
-} from './faceit_util';
+import { faceitApiClient } from './faceit_util';
 import { PlayersResponse } from '../server';
+
+interface ListResponse<T> {
+  items: T;
+}
 
 /** Informacje o graczu */
 type FACEITPlayer =
@@ -23,18 +20,23 @@ type FACEITPlayer =
       playsCS2: false;
     };
 
-/** Informacje o meczu zwracane przez API v1 */
-export interface Matchv1 {
-  matchId: string;
-  teamId: string;
-  i2: string;
-  elo: string;
-  competitionId: string;
-  created_at: number;
+/** Informacje o meczu zwracane przez API v4 */
+export interface Match {
+  match_id: string;
+  teams: {
+    faction1: Team;
+    faction2: Team;
+  };
+  results: {
+    winner: string;
+  };
+  competition_id: string;
+  started_at: number;
 }
 
-interface StatsResponse {
-  items: Stats[];
+interface Team {
+  team_id: string;
+  players: { player_id: string }[];
 }
 
 /** Statystyki gracza zwracane przez API v4 */
@@ -131,39 +133,35 @@ export function findUserProfile(
   username: string
 ): Promise<FACEITPlayer | undefined> {
   return new Promise<FACEITPlayer | undefined>((resolve, reject) => {
-    fetch(`${FACEIT_URL_BASE_V4}/players?nickname=${username}`, {
-      headers: HEADERS,
-    })
+    faceitApiClient
+      .get(`/players?nickname=${username}`)
       .then(async (res) => {
-        if (res.ok) {
-          const json = (await res.json()) as PlayersResponse;
-          if (json.games.cs2) {
-            resolve({
-              id: json.player_id,
-              username: json.nickname,
-              playsCS2: true,
-              elo: json.games.cs2.faceit_elo,
-              level: json.games.cs2.skill_level,
-            });
-          } else {
-            resolve({
-              id: json.player_id,
-              username: json.nickname,
-              playsCS2: false,
-            });
-          }
+        const player = res.data as PlayersResponse;
+        if (player.games.cs2) {
+          resolve({
+            id: player.player_id,
+            username: player.nickname,
+            playsCS2: true,
+            elo: player.games.cs2.faceit_elo,
+            level: player.games.cs2.skill_level,
+          });
         } else {
-          console.error(
-            `Nie udało się pobrać danych o graczu ${username}: ${res.status} ${res.statusText}`
-          );
-          if (res.status === 404) {
-            resolve(undefined);
-          } else {
-            reject(`${res.status} ${res.statusText} ${await res.text()}`);
-          }
+          resolve({
+            id: player.player_id,
+            username: player.nickname,
+            playsCS2: false,
+          });
         }
       })
       .catch((err) => {
+        console.error(
+          `Nie udało się pobrać danych o graczu ${username}: ${err.response.status} ${err.response.statusText}`
+        );
+        if (err.response.status === 404) {
+          resolve(undefined);
+        } else {
+          reject(`${err.response.status} ${err.response.statusText}`);
+        }
         reject(err);
       });
   });
@@ -175,41 +173,12 @@ export function findUserProfile(
  * @param size Ilość meczów z których mają zostać pobrane statystyki
  */
 export function getPlayerMatchHistory(id: string, size: number = 20) {
-  return new Promise<Matchv1[]>((resolve, reject) => {
-    fetch(
-      `${FACEIT_URL_BASE_V1}/stats/time/users/${id}/games/cs2?size=${size}`,
-      { headers: HEADERS_NO_AUTHORIZATION }
-    )
-      .then(async (response) => {
-        if (response.ok) {
-          let matches = (await response.json()) as Matchv1[];
-          matches = matches.filter((match) => match.elo !== undefined);
-          resolve(matches);
-        } else {
-          reject(`${response.status} ${response.statusText}`);
-        }
-      })
-      .catch((err) => {
-        reject(err);
-      });
-  });
-}
-
-/**
- * Funkcja pobierająca informacje o wybranym meczu.
- * @param id ID meczu z którego mają zostać pobrane informacje
- */
-export function getMatchV2(id: string) {
-  return new Promise<Matchv2>((resolve, reject) => {
-    fetch(`${FACEIT_URL_BASE_V2_MATCH}/match/${id}`, {
-      headers: HEADERS_NO_AUTHORIZATION,
-    })
-      .then(async (response) => {
-        if (response.ok) {
-          resolve(((await response.json()) as { payload: Matchv2 }).payload);
-        } else {
-          reject(`${response.status} ${response.statusText}`);
-        }
+  return new Promise<Match[]>((resolve, reject) => {
+    faceitApiClient
+      .get(`/players/${id}/history?game=cs2&limit=${size}`)
+      .then((response) => {
+        let matches = (response.data as ListResponse<Match[]>).items;
+        resolve(matches);
       })
       .catch((err) => {
         reject(err);
@@ -223,15 +192,10 @@ export function getMatchV2(id: string) {
  */
 export function getMatchStatsV4(matchId: string) {
   return new Promise<MatchStatsResponse>((resolve, reject) => {
-    fetch(`${FACEIT_URL_BASE_V4}/matches/${matchId}/stats`, {
-      headers: HEADERS,
-    })
+    faceitApiClient
+      .get(`/matches/${matchId}/stats`)
       .then(async (response) => {
-        if (response.ok) {
-          resolve((await response.json()) as MatchStatsResponse);
-        } else {
-          reject(`${response.status} ${response.statusText}`);
-        }
+        resolve(response.data as MatchStatsResponse);
       })
       .catch((err) => {
         reject(err);
@@ -246,44 +210,10 @@ export function getMatchStatsV4(matchId: string) {
  */
 export function getPlayerMatchStatsBulk(id: string, size: number = 100) {
   return new Promise<Stats[]>((resolve, reject) => {
-    fetch(
-      `${FACEIT_URL_BASE_V4}/players/${id}/games/cs2/stats?offset=0&limit=${size}`,
-      { headers: HEADERS }
-    )
+    faceitApiClient
+      .get(`/players/${id}/games/cs2/stats?offset=0&limit=${size}`)
       .then(async (response) => {
-        if (response.ok) {
-          resolve(((await response.json()) as StatsResponse).items);
-        } else {
-          reject(`${response.status} ${response.statusText}`);
-        }
-      })
-      .catch((err) => {
-        reject(err);
-      });
-  });
-}
-
-/**
- * Funkcja pobierająca ID aktualnego meczu wybranego gracza.
- * @param playerId ID gracza
- */
-export function getPlayerOngoingMatchId(playerId: string) {
-  return new Promise<string | undefined>((resolve, reject) => {
-    fetch(
-      `${FACEIT_URL_BASE_V1_MATCH}/matches/groupByState?userId=${playerId}`,
-      { headers: HEADERS_NO_AUTHORIZATION }
-    )
-      .then(async (response) => {
-        if (response.ok) {
-          const json = (await response.json()) as GroupByStateResponse;
-          if (!json.payload.ONGOING || json.payload.ONGOING.length === 0) {
-            resolve(undefined);
-            return;
-          }
-          resolve(json.payload.ONGOING[0].id);
-        } else {
-          reject(`${response.status} ${response.statusText}`);
-        }
+        resolve((response.data as ListResponse<Stats[]>).items);
       })
       .catch((err) => {
         reject(err);
